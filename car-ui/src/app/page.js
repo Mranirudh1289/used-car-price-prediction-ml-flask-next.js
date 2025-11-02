@@ -50,20 +50,23 @@ export default function Home() {
       setPredictedPrice("Loading...");
       setShowPopup(true);
 
-     fetch("https://used-car-price-prediction-ml-flask-next-qhpw.onrender.com/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        mode: "cors",
-      });
-
+      // ✅ FIXED: defined res
+      const res = await fetch(
+        "https://used-car-price-prediction-ml-flask-next-qhpw.onrender.com/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          mode: "cors",
+        }
+      );
 
       const data = await res.json();
 
       if (res.ok && data.price !== undefined) {
-        setPredictedPrice(`💸 Estimated Price: ${data.price} ₹ `);
+        setPredictedPrice(`💸 Estimated Price: ${data.price} ₹`);
       } else if (data.error) {
         setPredictedPrice("❌ Error: " + data.error);
       } else {
