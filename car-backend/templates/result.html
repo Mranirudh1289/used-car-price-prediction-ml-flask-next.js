@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Estimated Price — Premium</title>
+  <link href="/static/style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="result-page">
+    <div class="result-hero">
+      <div class="result-card glass-panel">
+        <h2 class="result-title">Predicted Price</h2>
+
+        <div class="price-box">
+          {% if prediction and prediction|string.startswith('Error') %}
+            <div class="price-error">{{ prediction }}</div>
+          {% else %}
+            <div class="price-value">₹ {{ prediction|default("N/A") }}</div>
+            <div class="price-sub">Estimated with RandomForest (R² ≈ 0.93) • ±₹76,000 (MAE)</div>
+          {% endif %}
+        </div>
+
+        <a href="/" class="btn-predict mt-4">Estimate another car</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

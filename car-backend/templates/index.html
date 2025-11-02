@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Premium Car Price Estimator</title>
+
+  <!-- model-viewer for GLB display (only used when GLB exists) -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="/static/style.css" rel="stylesheet">
+  <style>
+    /* small overrides for this file only (rest in style.css) */
+    .car-area { width:420px; height:300px; display:flex; align-items:center; justify-content:center; position:relative; }
+    .fallback-carousel { position:absolute; inset:0; }
+    .fallback-carousel img { width:100%; height:100%; object-fit:cover; border-radius:12px; opacity:0; transition:opacity .8s ease; position:absolute; }
+    .fallback-carousel img.show { opacity:1; }
+    model-viewer { width:100%; height:100%; border-radius:12px; background:transparent; }
+    .loading-badge { position:absolute; left:12px; top:12px; background:rgba(0,0,0,0.45); padding:6px 10px; border-radius:999px; font-size:12px; color:#ffd36b; border:1px solid rgba(255,255,255,0.03); }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="overlay"></div>
+      </div>
+
+      <div class="container">
+        <div class="glass-panel">
+          <div class="panel-left">
+            <h1 class="title">Premium Used Car Price Estimator</h1>
+            <p class="subtitle">Luxury visuals • Real-time estimates • Production-ready</p>
+
+            <!-- FORM posts to /predict (Flask) -->
+            <form id="predict-form" method="post" action="/predict">
+              <div class="row">
+                <div class="col">
+                  <label>Brand</label>
+                  <select name="brand" id="brand" class="input" required>
+                    <option>BMW</option>
+                    <option>Audi</option>
+                    <option>Mercedes</option>
+                    <option>Lamborghini</option>
+                    <option>Tesla</option>
+                  </select>
+                </div>
+                <div class="col">
+                  <label>Model</label>
+                  <input name="model" class="input" placeholder="e.g., 3 Series" required>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col"><label>Year</label><input name="year" type="number" min="1990" max="2025" value="2019" class="input" required></div>
+                <div class="col"><label>KM Driven</label><input name="km_driven" type="number" class="input" placeholder="e.g., 45000" required></div>
+              </div>
+
+              <div class="row">
+                <div class="col"><label>Transmission</label>
+                  <select name="transmission" class="input"><option value="0">Manual</option><option value="1">Automatic</option></select>
+                </div>
+                <div class="col"><label>Seats</label><input name="seats" type="number" min="2" max="15" value="5" class="input"></div>
+              </div>
+
+              <div class="row">
+                <div class="col"><label>Mileage (kmpl)</label><input name="mileage" step="0.01" class="input" placeholder="e.g., 18.9" required></div>
+                <div class="col"><label>Engine (cc)</label><input name="engine" type="number" class="input" placeholder="e.g., 1197" required></div>
+              </div>
+
+              <div class="row">
+                <div class="col"><label>Max Power (bhp)</label><input name="max_power" step="0.1" class="input" placeholder="e.g., 88.5" required></div>
+                <div class="col"><label>Fuel</label>
+                  <select name="fuel" class="input"><option>Petrol</option><option>Diesel</option><option>LPG</option></select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-full"><label>Owner</label>
+                  <select name="owner" class="input">
+                    <option>First Owner</option>
+                    <option>Second Owner</option>
+                    <option>Third Owner</option>
+                    <option>Fourth & Above Owner</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn-predict">Estimate Price</button>
+                <button type="reset" class="btn-outline">Reset</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel-right">
+            <div class="car-area" id="car-area">
+              <div class="loading-badge" id="loadingBadge">Visual: Loading</div>
+
+              <!-- model-viewer (hidden until a GLB is available) -->
+              <model-viewer id="mv" src="" alt="3D car model" exposure="1" auto-rotate camera-controls style="display:none;" shadow-intensity="1"></model-viewer>
+
+              <!-- fallback image carousel (visible by default) -->
+              <div class="fallback-carousel" id="fallback">
+                <img id="f0" src="https://source.unsplash.com/900x600/?bmw,car" class="show">
+                <img id="f1" src="https://source.unsplash.com/900x600/?audi,car">
+                <img id="f2" src="https://source.unsplash.com/900x600/?mercedes,car">
+                <img id="f3" src="https://source.unsplash.com/900x600/?lamborghini,car">
+                <img id="f4" src="https://source.unsplash.com/900x600/?tesla,car">
+              </div>
+            </div>
+
+            <div class="metrics">
+              <div class="mcard"><div class="mval">R²</div><div class="mtext">~0.93</div></div>
+              <div class="mcard"><div class="mval">MAE</div><div class="mtext">~₹76k</div></div>
+              <div class="mcard"><div class="mval">Realtime</div><div class="mtext">ms</div></div>
+            </div>
+          </div>
+        </div> <!-- glass-panel -->
+      </div> <!-- container -->
+    </section>
+  </main>
+
+<script>
+  // brand -> model filename (lowercase)
+  const brandToFile = {
+    'BMW': 'bmw.glb',
+    'Audi': 'audi.glb',
+    'Mercedes': 'mercedes.glb',
+    'Lamborghini': 'lamborghini.glb',
+    'Tesla': 'tesla.glb'
+  };
+
+  const brandSelect = document.getElementById('brand');
+  const mv = document.getElementById('mv');
+  const fallbackDiv = document.getElementById('fallback');
+  const loadingBadge = document.getElementById('loadingBadge');
+  const imgEls = Array.from(document.querySelectorAll('.fallback-carousel img'));
+
+  // rotate fallback images
+  let idx = 0;
+  setInterval(()=> {
+    imgEls.forEach((im,i)=> im.classList.toggle('show', i===idx));
+    idx = (idx+1) % imgEls.length;
+  }, 2800);
+
+  // helper: check if a static file exists (returns promise)
+  function fileExists(url){
+    return fetch(url, {method:'HEAD'}).then(res => res.ok).catch(()=>false);
+  }
+
+  async function setBrand(brand){
+    loadingBadge.innerText = 'Visual: checking...';
+    const filename = brandToFile[brand] || brand.toLowerCase()+'.glb';
+    const url = `/static/models/${filename}`;
+
+    const exists = await fileExists(url);
+    if (exists){
+      // show 3D model
+      mv.style.display = 'block';
+      mv.src = url;
+      fallbackDiv.style.display = 'none';
+      loadingBadge.innerText = 'Visual: 3D model loaded';
+      // small delay to let model-viewer initialize
+      setTimeout(()=> loadingBadge.style.opacity = '0.9', 200);
+    } else {
+      // fallback to image carousel
+      mv.style.display = 'none';
+      mv.removeAttribute('src');
+      fallbackDiv.style.display = 'block';
+      loadingBadge.innerText = 'Visual: images (no 3D model found)';
+    }
+  }
+
+  // initial brand
+  setBrand(brandSelect.value);
+
+  // on brand change
+  brandSelect.addEventListener('change', (e)=>{
+    setBrand(e.target.value);
+  });
+
+</script>
+</body>
+</html>

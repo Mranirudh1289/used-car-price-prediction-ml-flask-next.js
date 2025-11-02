@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.4.0",
+    "drei": "^2.2.21",
+    "framer-motion": "^12.23.24",
+    "howler": "^2.2.4",
+    "three": "^0.181.0"
+  }
+}
