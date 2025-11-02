@@ -1,0 +1,30 @@
+{
+  "name": "car-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.4.0",
+    "@react-three/postprocessing": "^3.0.4",
+    "framer-motion": "^10.18.0",
+    "framer-motion-3d": "^10.16.4",
+    "next": "16.0.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "tailwind-merge": "^3.3.1",
+    "three": "^0.181.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.1",
+    "tailwindcss": "^4"
+  }
+}
