@@ -50,7 +50,7 @@ export default function Home() {
       setPredictedPrice("Loading...");
       setShowPopup(true);
 
-      const res = await fetch("http://127.0.0.1:5001/predict", {
+     fetch("https://used-car-price-prediction-ml-flask-next-qhpw.onrender.com/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
